@@ -29,7 +29,7 @@ ctypes.windll.kernel32.GetProcAddress.argtypes = [LPVOID, LPSTR]
 ctypes.windll.kernel32.GetProcAddress.restype = LPVOID
 
 # ctypes.windll.kernel32.GetCurrentThreadId
-sys.threads_in_callback = set()
+sys.threads_in_callback = []
 
 minhook_error_values_map = {
 	-1 : 'MH_UNKNOWN',
@@ -224,10 +224,12 @@ class hook_entry:
 		self.enabled = False
 	
 	def __del__(self):
-		if self.enabled:
-			self.disable()
 		try:
+			if self.enabled:
+				self.disable()
+			
 			MH_RemoveHook(self.target)
+		
 		except MinHookException as e:
 			if e.minhook_error_value != MH_ERROR_NOT_INITIALIZED:
 				raise(e)
@@ -236,7 +238,7 @@ class hook_entry:
 		cur_tid = ctypes.windll.kernel32.GetCurrentThreadId()
 		if cur_tid in sys.threads_in_callback:
 			return self.realfunction(*args)
-		sys.threads_in_callback.add(cur_tid)
+		sys.threads_in_callback.append(cur_tid)
 		
 		adapted_args = []
 		for value, type in zip(args, self.original_types[1:]):
