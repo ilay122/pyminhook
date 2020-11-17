@@ -13,15 +13,17 @@ A small example exists in the examples directory
 	    functions = ["MessageBoxA", "send"]
 	    MessageBoxAPrototype = ctypes.WINFUNCTYPE(DWORD, LPVOID, LPSTR, LPSTR, LPVOID)
 	    sendPrototype = ctypes.WINFUNCTYPE(ctypes.c_uint, LPVOID, LPSTR, ctypes.c_uint, ctypes.c_uint)
+	    
 	pyminhook.add_function_definitions(my_func_defs)
 	
 	# define the callback function
 	@pyminhook.MessageBoxACallback
-        def msgbox_hook(a, content, title, c, real_function):
-	        k = real_function(0, b"lol", b"lol", 1)
-	        return k
+    def msgbox_hook(a, content, title, c, real_function):
+	    k = real_function(0, b"lol", b"lol", 1)
+	    return k
 	    
 	# hook it
+	pyminhook.MH_Initialize()
 	hook_entry = pyminhook.hook_entry.from_dll_name_and_apiname(b"user32", b"MessageBoxA", msgbox_hook)
 	hook_entry.enable()
 	
